@@ -18,13 +18,29 @@ mkdir $SHELL_FOLDER/output/lowlevelboot
 fi
 
 cd lowlevelboot
-$CROSS_PREFIX-gcc -x assembler-with-cpp -c startup.s -o $SHELL_FOLDER/output/lowlevelboot/startup.o
+$CROSS_PREFIX-gcc -ggdb -x assembler-with-cpp -c startup.s -o $SHELL_FOLDER/output/lowlevelboot/startup.o
 $CROSS_PREFIX-gcc -nostartfiles -T./boot.lds -Wl,-Map=$SHELL_FOLDER/output/lowlevelboot/lowlevel_fw.map -Wl,--gc-sections $SHELL_FOLDER/output/lowlevelboot/startup.o -o $SHELL_FOLDER/output/lowlevelboot/lowlevel_fw.elf
 $CROSS_PREFIX-objcopy -O binary -S $SHELL_FOLDER/output/lowlevelboot/lowlevel_fw.elf $SHELL_FOLDER/output/lowlevelboot/lowlevel_fw.bin
 $CROSS_PREFIX-objdump --source --demangle --disassemble --reloc --wide $SHELL_FOLDER/output/lowlevelboot/lowlevel_fw.elf > $SHELL_FOLDER/output/lowlevelboot/lowlevel_fw.lst
 
-cd $SHELL_FOLDER/output/lowlevelboot
+# compile opensbi
+if [ ! -d "$SHELL_FOLDER/output/opensbi" ]; then
+mkdir $SHELL_FOLDER/output/opensbi
+fi
+
+cd $SHELL_FOLDER/opensbi-0.9
+make CROSS_COMPILE=$CROSS_PREFIX- PLATFORM=quard_star
+cp -r $SHELL_FOLDER/opensbi-0.9/build/platform/quard_star/firmware/*.bin $SHELL_FOLDER/output/opensbi/
+
+# composite firmware
+if [ ! -d "$SHELL_FOLDER/output/fw" ]; then
+mkdir $SHELL_FOLDER/output/fw
+fi
+
+cd $SHELL_FOLDER/output/fw
 rm -rf fw.bin
 dd of=fw.bin bs=1k count=32k if=/dev/zero
-dd of=fw.bin bs=1k conv=notrunc seek=0 if=lowlevel_fw.bin
+dd of=fw.bin bs=1k conv=notrunc seek=0 if=$SHELL_FOLDER/output/lowlevelboot/lowlevel_fw.bin
+dd of=fw.bin bs=1k conv=notrunc seek=2k if=$SHELL_FOLDER/output/opensbi/fw_jump.bin
+
 cd $SHELL_FOLDER
