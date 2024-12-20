@@ -41,11 +41,11 @@
 static const MemMapEntry virt_memmap[] = {
     [QUARD_STAR_MROM]  = {        0x0,        0x8000 },
     [QUARD_STAR_SRAM]  = {     0x8000,        0x8000 },
-		[QUARD_STAR_CLINT] = {  0x2000000,       0x10000 },
-		[QUARD_STAR_PLIC]  = {  0xc000000,QUARD_STAR_PLIC_SIZE(QUARD_STAR_CPUS_MAX *2)},
+    [QUARD_STAR_CLINT] = {  0x2000000,       0x10000 },
+    [QUARD_STAR_PLIC]  = {  0xc000000,QUARD_STAR_PLIC_SIZE(QUARD_STAR_CPUS_MAX *2)},
     [QUARD_STAR_UART0] = { 0x10000000,         0x100 },
-    [QUARD_STAR_UART1] = { 0x10000100,         0x100 },
-    [QUARD_STAR_UART2] = { 0x10000200,         0x100 },
+    [QUARD_STAR_UART1] = { 0x10001000,         0x100 },
+    [QUARD_STAR_UART2] = { 0x10002000,         0x100 },
     [QUARD_STAR_FLASH] = { 0x20000000,      0x2000000},
     [QUARD_STAR_DRAM]  = { 0x80000000,           0x0 },
 };

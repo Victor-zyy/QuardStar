@@ -57,6 +57,13 @@ _start:
 	bne	a0, a6, _wait_relocate_copy_done
 _try_lottery:
 	/* Jump to relocation wait loop if we don't get relocation lottery */
+
+        /*
+        * _relocate_lottery particular address memory 0 
+        * to get lottery using amoadd (atomic instruction)
+        *
+        */
+
 	la	a6, _relocate_lottery
 	li	a7, 1
 	amoadd.w a6, a7, (a6)
@@ -69,15 +76,23 @@ _try_lottery:
 
 	/* Relocate if load address != link address */
 _relocate:
+        /*
+        * link_start is a particular address that stores _fw_start define in linker file
+        * link_start : 0x80000000 _fw_start
+        * link_end   : _fw_end defined in linker file fw_base.ldS
+        * load_start is address that runs VMA (_start really points eg.auipc instruction)
+        * load_start : 0x80000000 _start
+        */
 	la	t0, _link_start
 	REG_L	t0, 0(t0)
 	la	t1, _link_end
 	REG_L	t1, 0(t1)
 	la	t2, _load_start
 	REG_L	t2, 0(t2)
-	sub	t3, t1, t0
-	add	t3, t3, t2
-	beq	t0, t2, _relocate_done
+	sub	t3, t1, t0  // t3 firmware size
+	add	t3, t3, t2  // t3 load_end address
+	beq	t0, t2, _relocate_done // VMA = LMA relocate done
+        // relocate procedure
 	la	t4, _relocate_done
 	sub	t4, t4, t2
 	add	t4, t4, t0
@@ -137,6 +152,7 @@ _wait_relocate_copy_done:
 	nop
 	bgt     t4, t5, 1b
 	jr	t3
+
 _relocate_done:
 
 	/*
@@ -391,7 +407,7 @@ _start_warm:
 #else
 	lw	a5, (s9)
 #endif
-	beq	a5, s6, 2f
+	beq	a5, s6, 2f  //CPU0 boot hartid
 	add	s9, s9, 4
 	add	a4, a4, 1
 	blt	a4, s7, 1b

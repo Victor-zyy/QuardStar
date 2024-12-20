@@ -19,6 +19,7 @@
 
 
 extern struct sbi_platform platform;
+// why extern , opensbi use it in fw_base.S
 static u32 quard_star_hart_index2id[SBI_HARTMASK_MAX_BITS] = { 0 };
 
 /*

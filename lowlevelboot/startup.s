@@ -50,16 +50,32 @@ _start:
         slli    a2,     a2,     16      // a2 = 0x80200000
         load_data a0, a1, a2 
 
+        // load trusted_fw.bin 
+        // [0x20400000:0x20800000] --> [0xb0000000:0xb0400000]
+        li      a0,     0x204
+        slli    a0,     a0,     20      // a0 = 0x20400000
+        li      a1,     0xb00
+        slli    a1,     a1,     20      // a1 = 0xb0000000
+        li      a2,     0xb04
+        slli    a2,     a2,     20      // a2 = 0xb0400000
+        load_data a0, a1, a2 
+
 	csrr a0, mhartid		// read hart id start from M-machine mode
 	li	t0, 0x0
 	beq  a0, t0,    _no_wait
         loop 0x1000
+        
+        // boot CPU 0
+        // others CPU1~7 a0 = mhartid loop finished jump opensbi firmware
+        // a0 bootid 
+        // a1 device tree addr
+        // a2 ....
 _no_wait:
-        li      a1,     0x822
-        slli    a1,     a1,     20 
+        li      a1,     0x822           // set a1 device tree address
+        slli    a1,     a1,     20      // set a2 device tree end address
         li      t0,     0x800
         slli    t0,     t0,     20
-        jr      t0
+        jr      t0                      // jump t0 = 0x80000000
     
         .end
 	
