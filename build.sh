@@ -30,8 +30,10 @@ mkdir $SHELL_FOLDER/output/opensbi
 fi
 
 cd $SHELL_FOLDER/opensbi-0.9
+make clean
 make CROSS_COMPILE=$CROSS_PREFIX- PLATFORM=quard_star
 cp -r $SHELL_FOLDER/opensbi-0.9/build/platform/quard_star/firmware/*.bin $SHELL_FOLDER/output/opensbi/
+cp -r $SHELL_FOLDER/opensbi-0.9/build/platform/quard_star/firmware/*.elf $SHELL_FOLDER/output/opensbi/
 
 # generate dtb
 cd $SHELL_FOLDER/dts
@@ -41,6 +43,12 @@ dtc -I dts -O dtb -o $SHELL_FOLDER/output/opensbi/quard_star_sbi.dtb quard_star_
 if [ ! -d "$SHELL_FOLDER/output/trusted_domain" ]; then  
 mkdir $SHELL_FOLDER/output/trusted_domain
 fi 
+
+cd $SHELL_FOLDER/trusted_domain
+$CROSS_PREFIX-gcc -ggdb -x assembler-with-cpp -c startup.s -o $SHELL_FOLDER/output/trusted_domain/startup.o
+$CROSS_PREFIX-gcc -nostartfiles -T./link.lds -Wl,-Map=$SHELL_FOLDER/output/trusted_domain/trusted_fw.map -Wl,--gc-sections $SHELL_FOLDER/output/trusted_domain/startup.o -o $SHELL_FOLDER/output/trusted_domain/trusted_fw.elf
+$CROSS_PREFIX-objcopy -O binary -S $SHELL_FOLDER/output/trusted_domain/trusted_fw.elf $SHELL_FOLDER/output/trusted_domain/trusted_fw.bin
+$CROSS_PREFIX-objdump --source --demangle --disassemble --reloc --wide $SHELL_FOLDER/output/trusted_domain/trusted_fw.elf > $SHELL_FOLDER/output/trusted_domain/trusted_fw.lst
 
 # compile u-boot
 if [ ! -d "$SHELL_FOLDER/output/uboot" ]; then
@@ -58,12 +66,6 @@ $CROSS_PREFIX-objdump --source --demangle --disassemble --reloc --wide $SHELL_FO
 cd $SHELL_FOLDER/dts
 dtc -I dts -O dtb -o $SHELL_FOLDER/output/uboot/quard_star_uboot.dtb quard_star_uboot.dts
 
-# compile trusted_domain code
-cd $SHELL_FOLDER/trusted_domain
-$CROSS_PREFIX-gcc -ggdb -x assembler-with-cpp -c startup.s -o $SHELL_FOLDER/output/trusted_domain/startup.o
-$CROSS_PREFIX-gcc -nostartfiles -T./link.lds -Wl,-Map=$SHELL_FOLDER/output/trusted_domain/trusted_fw.map -Wl,--gc-sections $SHELL_FOLDER/output/trusted_domain/startup.o -o $SHELL_FOLDER/output/trusted_domain/trusted_fw.elf
-$CROSS_PREFIX-objcopy -O binary -S $SHELL_FOLDER/output/trusted_domain/trusted_fw.elf $SHELL_FOLDER/output/trusted_domain/trusted_fw.bin
-$CROSS_PREFIX-objdump --source --demangle --disassemble --reloc --wide $SHELL_FOLDER/output/trusted_domain/trusted_fw.elf > $SHELL_FOLDER/output/trusted_domain/trusted_fw.lst
 
 # composite firmware
 if [ ! -d "$SHELL_FOLDER/output/fw" ]; then

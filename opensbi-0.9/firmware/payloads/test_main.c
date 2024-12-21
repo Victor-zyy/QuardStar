@@ -39,6 +39,7 @@ static inline void sbi_ecall_console_puts(const char *str)
 		__asm__ __volatile__("wfi" ::: "memory"); \
 	} while (0)
 
+
 void test_main(unsigned long a0, unsigned long a1)
 {
 	sbi_ecall_console_puts("\nTest payload running\n");

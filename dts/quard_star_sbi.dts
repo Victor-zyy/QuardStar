@@ -7,55 +7,56 @@
 	model = "riscv-quard-star,qemu";
 
 	chosen {
+
             stdout-path = "/soc/uart0@10000000";
 
             opensbi-domains {
                 compatible = "opensbi,domain,config"; /* name of the node */
 
-            tmem: tmem {
-                compatible = "opensbi,domain,memregion";
-                base = <0x0 0xb0000000>;
-                order = <28>;
-            };
+                tmem: tmem {
+                    compatible = "opensbi,domain,memregion";
+                    base = <0x0 0xb0000000>;
+                    order = <28>;
+                };
 
-            tuart: tuart {
-                compatible = "opensbi,domain,memregion";
-                base = <0x0 0x10002000>;
-                order = <8>;
-                mmio;
-                devices = <&uart2>;
-            };
+                tuart: tuart {
+                    compatible = "opensbi,domain,memregion";
+                    base = <0x0 0x10002000>;
+                    order = <8>;
+                    mmio;
+                    devices = <&uart2>;
+                };
 
-            /* THis domain node protect all memory */
-            allmem: allmem {
-                compatible = "opensbi,domain,memregion";
-                base = <0x0 0x0>;
-                order = <64>;
-            };
+                /* THis domain node protect all memory */
+                allmem: allmem {
+                    compatible = "opensbi,domain,memregion";
+                    base = <0x0 0x0>;
+                    order = <64>;
+                };
 
-            tdomain: trusted-domain {
-                compatible = "opensbi,domain,instance";
-                possible-harts = <&cpu7>;
-                regions = <&tmem 0x7>, <&tuart 0x7>, <&allmem 0x7>;
-                boot-hart = <&cpu7>;
-                next-arg1 = <0x0 0x00000000>;
-		next-addr = <0x0 0xb0000000>;
-		next-mode = <0x1>;
-                system-reset-allowed;
-            };
+                tdomain: trusted-domain {
+                    compatible = "opensbi,domain,instance";
+                    possible-harts = <&cpu7>;
+                    regions = <&tmem 0x7>, <&tuart 0x7>, <&allmem 0x7>;
+                    boot-hart = <&cpu7>;
+                    next-arg1 = <0x0 0x00000000>;
+                    next-addr = <0x0 0xb0000000>;
+                    next-mode = <0x1>;
+                    system-reset-allowed;
+                };
 
-            udomain: untrusted-domain {
-                compatible = "opensbi,domain,instance";
-                possible-harts = <&cpu0 &cpu1 &cpu2 &cpu3 &cpu4 &cpu5 &cpu6>;
-                regions = <&tmem 0x0>, <&tuart 0x0>, <&allmem 0x7>;
-                        boot-hart = <&cpu0>;
-                next-arg1 = <0x0 0x82000000>;  // uboot start address
-                next-addr = <0x0 0x80200000>;  // uboot device tree
-                next-mode = <0x1>;
-                system-reset-allowed;
-            };
-	};
-    };
+                udomain: untrusted-domain {
+                    compatible = "opensbi,domain,instance";
+                    possible-harts = <&cpu0 &cpu1 &cpu2 &cpu3 &cpu4 &cpu5 &cpu6>;
+                    regions = <&tmem 0x0>, <&tuart 0x0>, <&allmem 0x7>;
+                            boot-hart = <&cpu0>;
+                    next-arg1 = <0x0 0x82000000>;  // uboot start address
+                    next-addr = <0x0 0x80200000>;  // uboot device tree
+                    next-mode = <0x1>;
+                    system-reset-allowed;
+                };
+	    };
+        };
 
 
 	memory@80000000 {

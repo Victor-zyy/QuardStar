@@ -26,6 +26,10 @@
 	.type _start,@function
 
 _start:
+        csrr    a0,     mhartid
+        li      t0,     0x0
+        bne     a0,     t0,     _copy_ddr_memory_after
+        
 	//load opensbi_fw.bin 
 	//[0x20200000:0x20400000] --> [0x80000000:0x80200000]
         li		a0,	0x202
@@ -76,7 +80,12 @@ _start:
 	slli	a2,	a2, 20      //a2 = 0x80600000
 	load_data a0,a1,a2
 
-        
+_copy_ddr_memory_after:
+
+        csrr    a0, mhartid
+        li      t0,     0x0
+        beq     a0,     t0, _no_wait
+        loop    0x2000
         // boot CPU 0
         // others CPU1~7 a0 = mhartid loop finished jump opensbi firmware
         // a0 bootid 

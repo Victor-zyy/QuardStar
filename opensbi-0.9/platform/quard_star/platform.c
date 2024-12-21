@@ -60,7 +60,7 @@ unsigned long fw_platform_init(unsigned long arg0, unsigned long arg1,
 		rc = fdt_parse_hart_id(fdt, cpu_offset, &hartid);
 		if (rc)
 			continue;
-
+                // 128 SBI_HARTMASK_MAX_BITS
 		if (SBI_HARTMASK_MAX_BITS <= hartid)
 			continue;
 
