@@ -30,7 +30,7 @@ mkdir $SHELL_FOLDER/output/opensbi
 fi
 
 cd $SHELL_FOLDER/opensbi-0.9
-make clean
+#make clean
 make CROSS_COMPILE=$CROSS_PREFIX- PLATFORM=quard_star
 cp -r $SHELL_FOLDER/opensbi-0.9/build/platform/quard_star/firmware/*.bin $SHELL_FOLDER/output/opensbi/
 cp -r $SHELL_FOLDER/opensbi-0.9/build/platform/quard_star/firmware/*.elf $SHELL_FOLDER/output/opensbi/
