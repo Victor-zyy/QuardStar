@@ -1,20 +1,35 @@
 /dts-v1/;
 
 / {
+        /*
+            address-cells and size-cells helps to parse the subnode "reg" property
+            as for an example:
+            reg<0x0 0x80000000 0x0 0x30000000>
+            and both of two are 0x2 which means
+            addr 0x00000000_80000000 two number consists one ref
+            size 0x00000000_30000000
+            reg property < address size>
+        */
 	#address-cells = <0x2>;
 	#size-cells = <0x2>;
 	compatible = "riscv-quard-star";
 	model = "riscv-quard-star,qemu";
 
 	chosen {
-		bootargs = "console=ttyS0";
+		bootargs = "root=/dev/vda2 rw console=ttyS0";
 		stdout-path = "/soc/uart0@10000000";
 	};
 
 	memory@80000000 {
 		device_type = "memory";
-		reg = <0x0 0x80000000 0x0 0x30000000>;
+		reg = <0x0 0x80000000 0x0 0x40000000>;
 	};
+
+        fw-cfg@10108000 {
+                dma-coherent;
+                reg = <0x0 0x10108000 0x0 0x18>;
+                compatible = "qemu,fw-cfg-mmio";
+        };
 
 	cpus {
 		#address-cells = <0x1>;
@@ -32,6 +47,7 @@
 
 			interrupt-controller {
 				#interrupt-cells = <0x1>;
+                                #address-cells = <0x0>;
 				interrupt-controller;
 				compatible = "riscv,cpu-intc";
 				phandle = <0x10>;
@@ -49,6 +65,7 @@
 
 			interrupt-controller {
 				#interrupt-cells = <0x1>;
+                                #address-cells = <0x0>;
 				interrupt-controller;
 				compatible = "riscv,cpu-intc";
 				phandle = <0xe>;
@@ -66,6 +83,7 @@
 
 			interrupt-controller {
 				#interrupt-cells = <0x1>;
+                                #address-cells = <0x0>;
 				interrupt-controller;
 				compatible = "riscv,cpu-intc";
 				phandle = <0xc>;
@@ -83,6 +101,7 @@
 
 			interrupt-controller {
 				#interrupt-cells = <0x1>;
+                                #address-cells = <0x0>;
 				interrupt-controller;
 				compatible = "riscv,cpu-intc";
 				phandle = <0xa>;
@@ -100,6 +119,7 @@
 
 			interrupt-controller {
 				#interrupt-cells = <0x1>;
+                                #address-cells = <0x0>;
 				interrupt-controller;
 				compatible = "riscv,cpu-intc";
 				phandle = <0x8>;
@@ -117,6 +137,7 @@
 
 			interrupt-controller {
 				#interrupt-cells = <0x1>;
+                                #address-cells = <0x0>;
 				interrupt-controller;
 				compatible = "riscv,cpu-intc";
 				phandle = <0x6>;
@@ -134,6 +155,7 @@
 
 			interrupt-controller {
 				#interrupt-cells = <0x1>;
+                                #address-cells = <0x0>;
 				interrupt-controller;
 				compatible = "riscv,cpu-intc";
 				phandle = <0x4>;
@@ -151,6 +173,7 @@
 
 			interrupt-controller {
 				#interrupt-cells = <0x1>;
+                                #address-cells = <0x0>;
 				interrupt-controller;
 				compatible = "riscv,cpu-intc";
 				phandle = <0x2>;
@@ -211,13 +234,76 @@
 		};
 
 		uart1: uart1@10001000 {
-			interrupts = <0xa>;
+			interrupts = <0xb>;
 			interrupt-parent = <0x11>;
 			clock-frequency = <0x384000>;
 			reg = <0x0 0x10001000 0x0 0x100>;
 			compatible = "ns16550a";
 		};
+                
+                /*
+                    in qemu-quard-star-board
+                    interrupt number is 1~8 for virtio_mmio
+                    the interrupts property is interrupt number index
+                    their interrupt parent is <0x11> which specifys the phandle in                    node (plic)
+                */
 
+		virtio_mmio@10107000 {
+			interrupts = <0x8>;
+			interrupt-parent = <0x11>;
+			reg = <0x0 0x10107000 0x0 0x1000>;
+			compatible = "virtio,mmio";
+		};
+		virtio_mmio@10106000 {
+			interrupts = <0x7>;
+			interrupt-parent = <0x11>;
+			reg = <0x0 0x10106000 0x0 0x1000>;
+			compatible = "virtio,mmio";
+		};
+		virtio_mmio@10105000 {
+			interrupts = <0x6>;
+			interrupt-parent = <0x11>;
+			reg = <0x0 0x10105000 0x0 0x1000>;
+			compatible = "virtio,mmio";
+		};
+		virtio_mmio@10104000 {
+			interrupts = <0x5>;
+			interrupt-parent = <0x11>;
+			reg = <0x0 0x10104000 0x0 0x1000>;
+			compatible = "virtio,mmio";
+		};
+		virtio_mmio@10103000 {
+			interrupts = <0x4>;
+			interrupt-parent = <0x11>;
+			reg = <0x0 0x10103000 0x0 0x1000>;
+			compatible = "virtio,mmio";
+		};
+		virtio_mmio@10102000 {
+			interrupts = <0x3>;
+			interrupt-parent = <0x11>;
+			reg = <0x0 0x10102000 0x0 0x1000>;
+			compatible = "virtio,mmio";
+		};
+		virtio_mmio@10101000 {
+			interrupts = <0x2>;
+			interrupt-parent = <0x11>;
+			reg = <0x0 0x10101000 0x0 0x1000>;
+			compatible = "virtio,mmio";
+		};
+		virtio_mmio@10100000 {
+			interrupts = <0x1>;
+			interrupt-parent = <0x11>;
+			reg = <0x0 0x10100000 0x0 0x1000>;
+			compatible = "virtio,mmio";
+		};
+
+                /*
+                    interrupt-controller defines this device is the interrupt
+                    controller and interrupts-cells property requests that how
+                    many cells to encode the interrupts of the sub-interrupt    
+                    device
+                    phandle is plic reference
+                */
 		plic@c000000 {
 			phandle = <0x11>;
 			riscv,ndev = <0x35>;
@@ -226,7 +312,7 @@
 			interrupt-controller;
 			compatible = "riscv,plic0";
 			#interrupt-cells = <0x1>;
-			#address-cells = <0x0>;
+                        #address-cells = <0x0>;
 		};
 
 		clint@2000000 {
