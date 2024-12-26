@@ -7,13 +7,13 @@ mkdir $1/target
 mkdir $1/target/bootfs
 mkdir $1/target/rootfs
 mount /dev/loop70p1 $1/target/bootfs 
-#mount /dev/loop70p2 $1/target/rootfs
+mount /dev/loop70p2 $1/target/rootfs
 
 cp -r $1/bootfs/* $1/target/bootfs/
-#cp -r $1/rootfs/* $1/target/rootfs/
+cp -r $1/rootfs/* $1/target/rootfs/
 sync
 
 umount $1/target/bootfs 
-#umount $1/target/rootfs
+umount $1/target/rootfs
 losetup -d /dev/loop70  
 sync

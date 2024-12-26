@@ -38,7 +38,7 @@ cp -r $SHELL_FOLDER/opensbi-0.9/build/platform/quard_star/firmware/*.elf $SHELL_
 
 # generate dtb
 cd $SHELL_FOLDER/dts
-dtc -I dts -O dtb -o $SHELL_FOLDER/output/opensbi/quard_star_sbi.dtb quard_star_sbi.dts
+#dtc -I dts -O dtb -o $SHELL_FOLDER/output/opensbi/quard_star_sbi.dtb quard_star_sbi.dts
 
 # compile trusted_domain
 if [ ! -d "$SHELL_FOLDER/output/trusted_domain" ]; then  
@@ -56,8 +56,8 @@ if [ ! -d "$SHELL_FOLDER/output/uboot" ]; then
 mkdir $SHELL_FOLDER/output/uboot
 fi
 cd $SHELL_FOLDER/u-boot-2021.07
-make CROSS_COMPILE=$CROSS_PREFIX- qemu-quard-star_defconfig
-make CROSS_COMPILE=$CROSS_PREFIX- -j4
+#make CROSS_COMPILE=$CROSS_PREFIX- qemu-quard-star_defconfig
+#make CROSS_COMPILE=$CROSS_PREFIX- -j4
 cp $SHELL_FOLDER/u-boot-2021.07/u-boot $SHELL_FOLDER/output/uboot/u-boot.elf
 cp $SHELL_FOLDER/u-boot-2021.07/u-boot.map $SHELL_FOLDER/output/uboot/u-boot.map
 cp $SHELL_FOLDER/u-boot-2021.07/u-boot.bin $SHELL_FOLDER/output/uboot/u-boot.bin
@@ -65,7 +65,7 @@ $CROSS_PREFIX-objdump --source --demangle --disassemble --reloc --wide $SHELL_FO
 
 # generate uboot.dtb
 cd $SHELL_FOLDER/dts
-dtc -I dts -O dtb -o $SHELL_FOLDER/output/uboot/quard_star_uboot.dtb quard_star_uboot.dts
+#dtc -I dts -O dtb -o $SHELL_FOLDER/output/uboot/quard_star_uboot.dtb quard_star_uboot.dts
 
 
 # composite firmware
@@ -92,6 +92,16 @@ cd $SHELL_FOLDER/linux-5.15.175
 #make ARCH=riscv CROSS_COMPILE=$CROSS_PREFIX- -j4
 cp $SHELL_FOLDER/linux-5.15.175/arch/riscv/boot/Image $SHELL_FOLDER/output/linux_kernel/Image
 
+# build busybox-1.33.1 stable
+if [ ! -d "$SHELL_FOLDER/output/busybox" ]; then
+mkdir $SHELL_FOLDER/output/busybox
+fi
+cd $SHELL_FOLDER/busybox-1.33.1
+make ARCH=riscv CROSS_COMPILE=$CROSS_PREFIX- quard_star_defconfig
+make ARCH=riscv CROSS_COMPILE=$CROSS_PREFIX- -j16
+make ARCH=riscv CROSS_COMPILE=$CROSS_PREFIX- install
+
+
 # composite rootfs
 if [ ! -d "$SHELL_FOLDER/output/rootfs" ]; then
 mkdir $SHELL_FOLDER/output/rootfs
@@ -105,14 +115,6 @@ if [ ! -d "$SHELL_FOLDER/output/rootfs/bootfs" ]; then
 mkdir $SHELL_FOLDER/output/rootfs/bootfs
 fi
 
-# build linux kernel
-if [ ! -d "$SHELL_FOLDER/output/linux_kernel" ]; then
-mkdir $SHELL_FOLDER/output/linux_kernel
-fi
-cd $SHELL_FOLDER/linux-5.15.175
-#make ARCH=riscv CROSS_COMPILE=$CROSS_PREFIX- defconfig
-#make ARCH=riscv CROSS_COMPILE=$CROSS_PREFIX- -j4
-cp $SHELL_FOLDER/linux-5.15.175/arch/riscv/boot/Image $SHELL_FOLDER/output/linux_kernel/Image
 
 #  1G rootfs
 cd $SHELL_FOLDER/output/rootfs
@@ -131,6 +133,7 @@ cp $SHELL_FOLDER/output/uboot/quard_star_uboot.dtb $SHELL_FOLDER/output/rootfs/b
 $SHELL_FOLDER/u-boot-2021.07/tools/mkimage -A riscv -O linux -T script -C none -a 0 -e 0 -n "Distro Boot Script" -d $SHELL_FOLDER/dts/quard_star_uboot.cmd $SHELL_FOLDER/output/rootfs/bootfs/boot.scr
 
 # copy files to filesystem
+cp -r $SHELL_FOLDER/output/busybox/* $SHELL_FOLDER/output/rootfs/rootfs/
 pkexec $SHELL_FOLDER/build_rootfs/build.sh $SHELL_FOLDER/output/rootfs
 
 cd $SHELL_FOLDER
