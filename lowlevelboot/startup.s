@@ -25,7 +25,7 @@
         .global _pen
         .type   _pen, %object
 _pen:
-        .word   1
+        .word  100
 
 
 	.section .text

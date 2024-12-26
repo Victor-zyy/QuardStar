@@ -21,6 +21,7 @@ SECTIONS
                 _sidata = _etext;
 	} > flash
 
+        . = SIZEOF(.text);
         .data :
         {
             . = ALIGN(4);

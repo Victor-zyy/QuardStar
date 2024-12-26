@@ -13,14 +13,15 @@ cd ..
 
 
 CROSS_PREFIX=riscv64-linux-gnu
+#CROSS_PREFIX=riscv64-unknown-elf
 
 if [ ! -d "$SHELL_FOLDER/output/lowlevelboot" ]; then
 mkdir $SHELL_FOLDER/output/lowlevelboot
 fi
 
 cd lowlevelboot
-$CROSS_PREFIX-gcc -fno-pic -ggdb -x assembler-with-cpp -c startup.s -o $SHELL_FOLDER/output/lowlevelboot/startup.o
-$CROSS_PREFIX-gcc -nostartfiles -T./boot.ld -Wl,-Map=$SHELL_FOLDER/output/lowlevelboot/lowlevel_fw.map -Wl,--gc-sections $SHELL_FOLDER/output/lowlevelboot/startup.o -o $SHELL_FOLDER/output/lowlevelboot/lowlevel_fw.elf
+$CROSS_PREFIX-gcc -fno-asynchronous-unwind-tables -fno-pic -fno-builtin -fdata-sections -ffunction-sections -static -ggdb -x assembler-with-cpp -c startup.s -o $SHELL_FOLDER/output/lowlevelboot/startup.o
+$CROSS_PREFIX-ld -T./boot.ld -Map=$SHELL_FOLDER/output/lowlevelboot/lowlevel_fw.map --gc-sections $SHELL_FOLDER/output/lowlevelboot/startup.o -o $SHELL_FOLDER/output/lowlevelboot/lowlevel_fw.elf
 $CROSS_PREFIX-objcopy -O binary -S $SHELL_FOLDER/output/lowlevelboot/lowlevel_fw.elf $SHELL_FOLDER/output/lowlevelboot/lowlevel_fw.bin
 $CROSS_PREFIX-objdump --source --demangle --disassemble --reloc --wide $SHELL_FOLDER/output/lowlevelboot/lowlevel_fw.elf > $SHELL_FOLDER/output/lowlevelboot/lowlevel_fw.lst
 
@@ -45,8 +46,8 @@ mkdir $SHELL_FOLDER/output/trusted_domain
 fi 
 
 cd $SHELL_FOLDER/trusted_domain
-$CROSS_PREFIX-gcc -ggdb -x assembler-with-cpp -c startup.s -o $SHELL_FOLDER/output/trusted_domain/startup.o
-$CROSS_PREFIX-gcc -nostartfiles -T./link.lds -Wl,-Map=$SHELL_FOLDER/output/trusted_domain/trusted_fw.map -Wl,--gc-sections $SHELL_FOLDER/output/trusted_domain/startup.o -o $SHELL_FOLDER/output/trusted_domain/trusted_fw.elf
+$CROSS_PREFIX-gcc -fno-asynchronous-unwind-tables -fno-pic -fno-builtin -fdata-sections -ffunction-sections -static -ggdb -x assembler-with-cpp -c startup.s -o $SHELL_FOLDER/output/trusted_domain/startup.o
+$CROSS_PREFIX-ld -T./link.ld -Map=$SHELL_FOLDER/output/trusted_domain/trusted_fw.map --gc-sections $SHELL_FOLDER/output/trusted_domain/startup.o -o $SHELL_FOLDER/output/trusted_domain/trusted_fw.elf
 $CROSS_PREFIX-objcopy -O binary -S $SHELL_FOLDER/output/trusted_domain/trusted_fw.elf $SHELL_FOLDER/output/trusted_domain/trusted_fw.bin
 $CROSS_PREFIX-objdump --source --demangle --disassemble --reloc --wide $SHELL_FOLDER/output/trusted_domain/trusted_fw.elf > $SHELL_FOLDER/output/trusted_domain/trusted_fw.lst
 
