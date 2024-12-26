@@ -8,3 +8,5 @@ mkfs.vfat /dev/loop70p1
 mkfs.ext4 /dev/loop70p2
 losetup -d /dev/loop70  
 sync
+echo "please wait 5s"
+sleep 5
