@@ -13,6 +13,7 @@ cd ..
 
 
 CROSS_PREFIX=riscv64-linux-gnu
+CROSS_LIBDIR=/usr/riscv64-linux-gnu/lib
 #CROSS_PREFIX=riscv64-unknown-elf
 
 if [ ! -d "$SHELL_FOLDER/output/lowlevelboot" ]; then
@@ -98,7 +99,7 @@ mkdir $SHELL_FOLDER/output/busybox
 fi
 cd $SHELL_FOLDER/busybox-1.33.1
 #make ARCH=riscv CROSS_COMPILE=$CROSS_PREFIX- quard_star_defconfig
-#make ARCH=riscv CROSS_COMPILE=$CROSS_PREFIX- -j16
+#make ARCH=riscv CROSS_COMPILE=$CROSS_PREFIX- -j4
 #make ARCH=riscv CROSS_COMPILE=$CROSS_PREFIX- install
 
 
@@ -135,10 +136,21 @@ $SHELL_FOLDER/u-boot-2021.07/tools/mkimage -A riscv -O linux -T script -C none -
 # copy files to filesystem
 cp -r $SHELL_FOLDER/output/busybox/* $SHELL_FOLDER/output/rootfs/rootfs/
 cp -r $SHELL_FOLDER/target_root_script/* $SHELL_FOLDER/output/rootfs/rootfs/
+
 mkdir -p $SHELL_FOLDER/output/rootfs/rootfs/proc
 mkdir -p $SHELL_FOLDER/output/rootfs/rootfs/sys
 mkdir -p $SHELL_FOLDER/output/rootfs/rootfs/dev
 mkdir -p $SHELL_FOLDER/output/rootfs/rootfs/tmp
+
+# for dynamic linked libraries
+mkdir -p $SHELL_FOLDER/output/rootfs/rootfs/lib
+
+cd $SHELL_FOLDER/output/rootfs/rootfs
+#create symbolic symbol
+ln -s ./lib ./lib64
+cd $SHELL_FOLDER
+
+cp /usr/riscv64-linux-gnu/lib/* $SHELL_FOLDER/output/rootfs/rootfs/lib/
 pkexec $SHELL_FOLDER/build_rootfs/build.sh $SHELL_FOLDER/output/rootfs
 
 cd $SHELL_FOLDER
