@@ -27,7 +27,7 @@ busybox_unstripped*
 *~
 *.orig
 *.rej
-/*.patch
+*.patch
 
 #
 # debugging stuff
