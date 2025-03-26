@@ -123,6 +123,8 @@ static int sbi_ecall_ipi_handler(unsigned long extid, unsigned long funcid,
 
 	if (funcid == SBI_EXT_IPI_SEND_IPI)
 		ret = sbi_ipi_send_smode(regs->a0, regs->a1);
+	else if ( funcid == SBI_EXT_IPI_SEND_MSG_IPI)
+	  ret = sbi_ipi_send_msg(regs->a0, regs->a1, (void *)regs->a2); // a2 use for data address
 	else
 		ret = SBI_ENOTSUPP;
 

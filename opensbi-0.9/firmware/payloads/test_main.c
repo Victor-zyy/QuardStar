@@ -6,44 +6,39 @@
  * Authors:
  *   Anup Patel <anup.patel@wdc.com>
  */
-
 #include <sbi/sbi_ecall_interface.h>
-
-#define SBI_ECALL(__num, __a0, __a1, __a2)                                    \
-	({                                                                    \
-		register unsigned long a0 asm("a0") = (unsigned long)(__a0);  \
-		register unsigned long a1 asm("a1") = (unsigned long)(__a1);  \
-		register unsigned long a2 asm("a2") = (unsigned long)(__a2);  \
-		register unsigned long a7 asm("a7") = (unsigned long)(__num); \
-		asm volatile("ecall"                                          \
-			     : "+r"(a0)                                       \
-			     : "r"(a1), "r"(a2), "r"(a7)                      \
-			     : "memory");                                     \
-		a0;                                                           \
-	})
-
-#define SBI_ECALL_0(__num) SBI_ECALL(__num, 0, 0, 0)
-#define SBI_ECALL_1(__num, __a0) SBI_ECALL(__num, __a0, 0, 0)
-#define SBI_ECALL_2(__num, __a0, __a1) SBI_ECALL(__num, __a0, __a1, 0)
-
-#define sbi_ecall_console_putc(c) SBI_ECALL_1(SBI_EXT_0_1_CONSOLE_PUTCHAR, (c))
-
-static inline void sbi_ecall_console_puts(const char *str)
-{
-	while (str && *str)
-		sbi_ecall_console_putc(*str++);
-}
-
-#define wfi()                                             \
-	do {                                              \
-		__asm__ __volatile__("wfi" ::: "memory"); \
-	} while (0)
+#include "mini-libc/mini_printf.h"
+#include "mini-timer/timer.h"
+#include "sbi_ecall_macro.h"
 
 
+int jtime = 0;
+
+char src_str[64] = "hello, this is core0\n";
 void test_main(unsigned long a0, unsigned long a1)
 {
-	sbi_ecall_console_puts("\nTest payload running\n");
+	mini_printf("\nTest payload mini_printf!\n");
+	reset_timer();
 
-	while (1)
-		wfi();
+	while (1){
+
+	  wfi();
+	  if(jtime < 20){
+	    mini_printf("\nTest timer interrupt : %d!\n", jtime);
+	  }
+
+	  if(jtime == 10){ // 10s hsm wake the core 1 up
+	    // SBI_EXT_HSM
+	    // regs->a0 hartid
+	    // rges->a1 saddr
+	    // rges->a2 priv
+	    SBI_ECALL(SBI_EXT_HSM, SBI_EXT_HSM_HART_START, 1, 0x80400000, 1); 
+	  }
+
+	  if(jtime == 20){
+	    // regs->a0 hmask
+	    // reg->a1 hbase
+	    SBI_ECALL(SBI_EXT_IPI, SBI_EXT_IPI_SEND_MSG_IPI, 2, 0, (unsigned long)src_str);
+	  }
+	}
 }

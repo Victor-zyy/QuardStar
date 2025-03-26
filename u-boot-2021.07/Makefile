@@ -496,6 +496,7 @@ ifneq ($(KBUILD_SRC),)
 	    $(srctree) $(objtree) $(VERSION) $(PATCHLEVEL)
 endif
 
+
 # To make sure we do not include .config for any of the *config targets
 # catch them early, and hand them over to scripts/kconfig/Makefile
 # It is allowed to specify more targets when calling make, including
@@ -562,7 +563,6 @@ config: scripts_basic outputmakefile FORCE
 
 %config: scripts_basic outputmakefile FORCE
 	$(Q)$(MAKE) $(build)=scripts/kconfig $@
-
 else
 # ===========================================================================
 # Build targets only - this includes vmlinux, arch specific targets, clean
@@ -2317,6 +2317,20 @@ endif	# skip-makefile
 PHONY += FORCE
 FORCE:
 
+
+zyytest:
+	@echo "zyy"
+	@echo "KBUILD_SRC=" $(KBUILD_SRC)
+	@echo $(HOSTARCH)
+	@echo $(HOSTOS)
+	@echo $(LC_ALL)
+	@echo $(LC_COLLATE)
+	@echo $(LC_NUMERIC)
+	@echo $(srctree)
+	@echo $(objtree)
+	@echo $(src)
+	@echo $(obj)
+	@echo $(VPATH)
 # Declare the contents of the PHONY variable as phony.  We keep that
 # information in a variable so we can use it in if_changed and friends.
 .PHONY: $(PHONY)

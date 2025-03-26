@@ -37,12 +37,15 @@
 #define SBI_EXT_BASE_GET_MVENDORID		0x4
 #define SBI_EXT_BASE_GET_MARCHID		0x5
 #define SBI_EXT_BASE_GET_MIMPID			0x6
+#define SBI_EXT_BASE_GET_MSG			0x7
 
 /* SBI function IDs for TIME extension*/
 #define SBI_EXT_TIME_SET_TIMER			0x0
 
 /* SBI function IDs for IPI extension*/
 #define SBI_EXT_IPI_SEND_IPI			0x0
+/* FIXME: add sbi_msg send */
+#define SBI_EXT_IPI_SEND_MSG_IPI		0xf
 
 /* SBI function IDs for RFENCE extension*/
 #define SBI_EXT_RFENCE_REMOTE_FENCE_I		0x0

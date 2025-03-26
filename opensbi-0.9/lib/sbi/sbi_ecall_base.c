@@ -15,6 +15,10 @@
 #include <sbi/sbi_version.h>
 #include <sbi/riscv_asm.h>
 
+#include <sbi/sbi_string.h>
+#include <sbi/sbi_ipi.h>
+#include <sbi/sbi_scratch.h>
+
 static int sbi_ecall_base_probe(unsigned long extid, unsigned long *out_val)
 {
 	struct sbi_ecall_extension *ext;
@@ -38,6 +42,8 @@ static int sbi_ecall_base_handler(unsigned long extid, unsigned long funcid,
 				  struct sbi_trap_info *out_trap)
 {
 	int ret = 0;
+	struct sbi_scratch *scratch;
+	char *data;
 
 	switch (funcid) {
 	case SBI_EXT_BASE_GET_SPEC_VERSION:
@@ -65,6 +71,11 @@ static int sbi_ecall_base_handler(unsigned long extid, unsigned long funcid,
 	case SBI_EXT_BASE_PROBE_EXT:
 		ret = sbi_ecall_base_probe(regs->a0, out_val);
 		break;
+	case SBI_EXT_BASE_GET_MSG:
+	       scratch = sbi_scratch_thishart_ptr();
+	       data = sbi_scratch_offset_ptr(scratch, ipi_msg_off);
+	       sbi_memcpy((void *)regs->a2, data, sbi_strlen(data) + 1);
+	       break;
 	default:
 		ret = SBI_ENOTSUPP;
 	}

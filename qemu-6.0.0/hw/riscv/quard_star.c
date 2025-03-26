@@ -73,8 +73,7 @@ static PFlashCFI01
     return PFLASH_CFI01(dev);
 }
 
-static void quard_star_flash_map(PFlashCFI01 *flash, hwaddr base, hwaddr size,
-								MemoryRegion *sysmem)
+static void quard_star_flash_map(PFlashCFI01 *flash, hwaddr base, hwaddr size, MemoryRegion *sysmem)
 {
     DeviceState *dev = DEVICE(flash);
     assert(QEMU_IS_ALIGNED(size, QUARD_STAR_FLASH_SECTOR_SIZE));

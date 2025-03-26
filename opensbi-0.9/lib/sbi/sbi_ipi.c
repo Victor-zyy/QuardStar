@@ -19,12 +19,18 @@
 #include <sbi/sbi_init.h>
 #include <sbi/sbi_ipi.h>
 #include <sbi/sbi_platform.h>
+#include <sbi/sbi_string.h>
 
 struct sbi_ipi_data {
 	unsigned long ipi_type;
 };
 
 static unsigned long ipi_data_off;
+
+// allocate 64 bytes of msg in each scratch hart
+#define IPI_MSG_SIZE 64
+
+unsigned long ipi_msg_off;
 
 static const struct sbi_ipi_event_ops *ipi_ops_array[SBI_IPI_EVENT_MAX];
 
@@ -59,6 +65,7 @@ static int sbi_ipi_send(struct sbi_scratch *scratch, u32 remote_hartid,
 	 * Set IPI type on remote hart's scratch area and
 	 * trigger the interrupt
 	 */
+
 	atomic_raw_set_bit(event, &ipi_data->ipi_type);
 	smp_wmb();
 	sbi_platform_ipi_send(plat, remote_hartid);
@@ -172,6 +179,50 @@ int sbi_ipi_send_halt(ulong hmask, ulong hbase)
 	return sbi_ipi_send_many(hmask, hbase, ipi_halt_event, NULL);
 }
 
+/* FIXME:  */
+
+static void sbi_ipi_process_msg(struct sbi_scratch *scratch)
+{
+     scratch = scratch;
+     return;
+
+}
+static int sbi_ipi_update_msg(struct sbi_scratch *scratch, struct sbi_scratch *remote_scratch,
+			      u32 remote_hartid, void *data){
+
+  // in case of warning
+  // 
+  scratch = scratch;
+  remote_hartid = remote_hartid;
+
+  if(sbi_strlen((char *)data) > 64){
+    return -1;
+  }
+
+  char *msg;
+
+  msg = sbi_scratch_offset_ptr(remote_scratch, ipi_msg_off);
+  sbi_memcpy((void *)msg, data, sbi_strlen((char*)data) + 1);
+
+  return 0;
+
+}
+
+static struct sbi_ipi_event_ops ipi_msg_ops = {
+	.name = "IPI_MSG",
+	.update = sbi_ipi_update_msg,
+	.process = sbi_ipi_process_msg,
+};
+
+static u32 ipi_smode_msg_event = SBI_IPI_EVENT_MAX;
+
+int sbi_ipi_send_msg(ulong hmask, ulong hbase, void *data)
+{
+	return sbi_ipi_send_many(hmask, hbase, ipi_smode_msg_event, data);
+}
+
+///* FIXME:  */
+
 void sbi_ipi_process(void)
 {
 	unsigned long ipi_type;
@@ -209,6 +260,8 @@ int sbi_ipi_init(struct sbi_scratch *scratch, bool cold_boot)
 	if (cold_boot) {
 		ipi_data_off = sbi_scratch_alloc_offset(sizeof(*ipi_data),
 							"IPI_DATA");
+		ipi_msg_off = sbi_scratch_alloc_offset(IPI_MSG_SIZE,
+							"IPI_MSG");
 		if (!ipi_data_off)
 			return SBI_ENOMEM;
 		ret = sbi_ipi_event_create(&ipi_smode_ops);
@@ -219,6 +272,13 @@ int sbi_ipi_init(struct sbi_scratch *scratch, bool cold_boot)
 		if (ret < 0)
 			return ret;
 		ipi_halt_event = ret;
+
+		// add-my code for ipi_send_message
+		ret = sbi_ipi_event_create(&ipi_msg_ops);
+		if(ret < 0)
+		        return ret;
+		ipi_smode_msg_event = ret;
+		
 	} else {
 		if (!ipi_data_off)
 			return SBI_ENOMEM;

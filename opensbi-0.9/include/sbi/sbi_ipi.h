@@ -20,6 +20,8 @@
 
 struct sbi_scratch;
 
+extern unsigned long ipi_msg_off;
+
 /** IPI event operations or callbacks */
 struct sbi_ipi_event_ops {
 	/** Name of the IPI event operations */
@@ -56,6 +58,8 @@ int sbi_ipi_event_create(const struct sbi_ipi_event_ops *ops);
 void sbi_ipi_event_destroy(u32 event);
 
 int sbi_ipi_send_smode(ulong hmask, ulong hbase);
+
+int sbi_ipi_send_msg(ulong hmask, ulong hbase, void *data);
 
 void sbi_ipi_clear_smode(void);
 

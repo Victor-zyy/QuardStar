@@ -10,4 +10,4 @@ $SHELL_FOLDER/output/qemu/bin/qemu-system-riscv64 \
 -drive file=$SHELL_FOLDER/output/rootfs/rootfs.img,format=raw,id=hd0 \
 -device virtio-blk-device,drive=hd0 \
 -fw_cfg name="opt/qemu_cmdline",string="qemu_vc="$DEFAULT_V"" \
---serial vc:$DEFAULT_VC --serial vc:$DEFAULT_VC --serial vc:$DEFAULT_VC --monitor vc:$DEFAULT_VC -display sdl --parallel none $1
+--serial vc:$DEFAULT_VC --serial vc:$DEFAULT_VC --serial vc:$DEFAULT_VC --monitor vc:$DEFAULT_VC -display gtk --parallel none $1

@@ -534,7 +534,7 @@ fw_platform_init:
 	csrr	t0, CSR_MSTATUS
 	srl	t0, t0, MSTATUS_MPP_SHIFT
 	and	t0, t0, PRV_M
-	slti	t0, t0, PRV_M
+	slti	t0, t0, PRV_M // MPP 0 U-mode , MPP 1 S-mode , MPP 2 M-mode
 	add	t0, t0, -1
 	xor	sp, sp, tp
 	and	t0, t0, sp
