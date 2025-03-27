@@ -1,0 +1,81 @@
+/dts-v1/; /* means that the file's content are in version of the DTS syntax */
+
+/ {	/* root */
+	/* compatible = "manufacture, model" */
+	// compatible = "blaze,qemu-board";
+	// model = "" define by yourself
+	// reg -->
+	#address-cells = <0x2>; 
+	#size-cells = <0x2>;
+	compatible = "blaze,riscv-quard-star";
+	model = "qemu-board";
+
+	/* pass args for linux or u-boot*/
+	chosen {
+		bootargs="console=ttyS0";
+		stdout-path="/soc/uart0@10000000";
+	};
+
+	/* one riscv64-core */
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		//timebase-frequency = <10000000>;
+
+		cpu0: cpu@0{
+			reg = <0x0>;
+			device_type = "cpu";
+			compatible = "riscv";
+
+			inc0:interrupt-controller{
+				phandle=<0x1>;
+				#interrupt-cells=<0x1>;
+				interrupt-controllers;
+				compatible="riscv,cpu-intc";
+			};
+		};
+
+	};
+
+
+	memory@80000000 {
+		device_type = "memory";
+		// addr: 0x80000000
+		// size: 0x40000000
+		reg = <0x0 0x80000000 0x0 0x40000000>;
+	};
+
+	soc {
+		#address-cells = <0x2>; 
+		#size-cells = <0x2>;
+		compatible = "simple-bus";
+
+		uart0: uart0@10000000{
+			interrupts = <0xa>;
+			clock-frequency = <0x384000>;
+			interrupt-parent = <&plic>;
+			reg = <0x0 0x10000000 0x0 0x100>;
+			compatible = "ns16550a";
+		};
+
+		plic: plic@c000000 {
+			phandle = <0x11>;
+			riscv,ndev = <0x35>;
+			reg = <0x0 0xc000000 0x0 0x210000>;
+			interrupts-extended = <&inc0 0xa>;
+			interrupt-controller;
+			compatible = "riscv,plic0";
+			#interrupt-cells = <0x1>;
+			#address-cells = <0x0>;
+		};
+
+		clint: clint@2000000 {
+			// format <phandle> <prop-encoded-array>
+			interrupts-extended = <&inc0 0x3>, <&inc0 0x7>; // 0x03 software interrupt  0x07 timer interrupt
+			reg = <0x0 0x2000000 0x0 0x10000>;
+			compatible = "riscv,clint0";
+		};
+
+	};
+
+};

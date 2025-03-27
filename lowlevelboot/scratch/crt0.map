@@ -1,0 +1,65 @@
+
+Discarded input sections
+
+ .bss           0x0000000000000000        0x0 /home/zyy/repo/QuardStar_Tutorial/output/lowlevelboot/crt0.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+flash            0x0000000020000000 0x0000000000080000 axrl
+sram             0x0000000000008000 0x0000000000008000 axrwl
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+
+.text           0x0000000020000000      0x108
+ *(.text)
+ .text          0x0000000020000000      0x104 /home/zyy/repo/QuardStar_Tutorial/output/lowlevelboot/crt0.o
+                0x0000000020000000                _start
+                0x0000000020000108                . = ALIGN (0x8)
+ *fill*         0x0000000020000104        0x4 
+                0x0000000020000108                _etext = .
+                0x0000000020000108                _sidata = _etext
+
+.rela.dyn       0x0000000020000108        0x0
+ .rela.text     0x0000000020000108        0x0 /home/zyy/repo/QuardStar_Tutorial/output/lowlevelboot/crt0.o
+                0x0000000000000108                . = SIZEOF (.text)
+
+.data           0x0000000000008000        0x8 load address 0x0000000020000108
+                0x0000000000008000                . = ALIGN (0x4)
+                0x0000000000008000                _sdata = .
+ *(.data)
+ .data          0x0000000000008000        0x8 /home/zyy/repo/QuardStar_Tutorial/output/lowlevelboot/crt0.o
+                0x0000000000008000                _copy_done
+                0x0000000000008008                . = ALIGN (0x4)
+                0x0000000000008008                _edata = .
+LOAD /home/zyy/repo/QuardStar_Tutorial/output/lowlevelboot/crt0.o
+OUTPUT(/home/zyy/repo/QuardStar_Tutorial/output/lowlevelboot/crt0.elf elf64-littleriscv)
+
+.riscv.attributes
+                0x0000000000000000       0x37
+ .riscv.attributes
+                0x0000000000000000       0x37 /home/zyy/repo/QuardStar_Tutorial/output/lowlevelboot/crt0.o
+
+.debug_line     0x0000000000000000      0x13a
+ .debug_line    0x0000000000000000      0x13a /home/zyy/repo/QuardStar_Tutorial/output/lowlevelboot/crt0.o
+
+.debug_line_str
+                0x0000000000000000       0x3e
+ .debug_line_str
+                0x0000000000000000       0x3e /home/zyy/repo/QuardStar_Tutorial/output/lowlevelboot/crt0.o
+                                         0x45 (size before relaxing)
+
+.debug_info     0x0000000000000000       0x29
+ .debug_info    0x0000000000000000       0x29 /home/zyy/repo/QuardStar_Tutorial/output/lowlevelboot/crt0.o
+
+.debug_abbrev   0x0000000000000000       0x14
+ .debug_abbrev  0x0000000000000000       0x14 /home/zyy/repo/QuardStar_Tutorial/output/lowlevelboot/crt0.o
+
+.debug_aranges  0x0000000000000000       0x30
+ .debug_aranges
+                0x0000000000000000       0x30 /home/zyy/repo/QuardStar_Tutorial/output/lowlevelboot/crt0.o
+
+.debug_str      0x0000000000000000       0x4a
+ .debug_str     0x0000000000000000       0x4a /home/zyy/repo/QuardStar_Tutorial/output/lowlevelboot/crt0.o
