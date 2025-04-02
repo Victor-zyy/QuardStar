@@ -41,17 +41,17 @@ _start:
         load_data       a0,     a1,     a2 
 
 	// opensbi 
-	// 0x20200000  [0x80000000-0x80200000] 2MBytes
-	li 	a0, 	0x202
+	// 0x20100000  [0x80000000-0x80100000] 1MBytes
+	li 	a0, 	0x201
 	slli 	a0, 	a0, 	20
 	li 	a1, 	0x800
 	slli 	a1, 	a1, 	20
-	li 	a2, 	0x802
+	li 	a2, 	0x801
 	slli 	a2, 	a2, 	20
 
 	load_data a0,	a1,	a2
 
-	// load device tree
+	// load device tree 512KB
 	// 0x20080000  [0x82200000-0x82280000]
 	li 	a0, 	0x2008
 	slli 	a0, 	a0, 	16
@@ -62,9 +62,9 @@ _start:
 
 	load_data a0,	a1,	a2
 
-	// load uboot 0x9a47e ~ 1MB
-	// 0x20800000  [0x80200000-0x80400000]
-	li 	a0, 	0x208
+	// load uboot 0x9a47e ~ 2MB
+	// 0x20200000  [0x80200000-0x80400000]
+	li 	a0, 	0x202
 	slli 	a0, 	a0, 	20
 	li 	a1, 	0x802
 	slli 	a1, 	a1, 	20

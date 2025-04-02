@@ -632,6 +632,7 @@ static void sifive_u_machine_init(MachineState *machine)
     flash_dev = qdev_new("is25wp256");
     dinfo = drive_get_next(IF_MTD);
     if (dinfo) {
+
         qdev_prop_set_drive_err(flash_dev, "drive",
                                 blk_by_legacy_dinfo(dinfo),
                                 &error_fatal);

@@ -20,12 +20,15 @@
 	cpus {
 		#address-cells = <1>;
 		#size-cells = <0>;
-		//timebase-frequency = <10000000>;
+		timebase-frequency = <10000000>;
 
 		cpu0: cpu@0{
 			reg = <0x0>;
 			device_type = "cpu";
 			compatible = "riscv";
+			status = "okay";
+			riscv,isa = "rv64imafdcsu";
+			mmu-type = "riscv,sv48";
 
 			inc0:interrupt-controller{
 				phandle=<0x1>;
@@ -74,6 +77,36 @@
 			interrupts-extended = <&inc0 0x3>, <&inc0 0x7>; // 0x03 software interrupt  0x07 timer interrupt
 			reg = <0x0 0x2000000 0x0 0x10000>;
 			compatible = "riscv,clint0";
+		};
+
+		flash: flash@20000000 {
+			#address-cells = <2>;
+			#size-cells = <2>;
+			compatible = "cfi-flash", "jedec-flash";
+			reg = <0x0 0x20000000 0x0 0x02000000>;
+			// ranges is about mapping < sub-address, parent-address, address-length >
+			bank-width = <4>;
+			device-width = <2>;
+			partition@0 {
+				label = "crt0-lowlevel";
+				reg = <0x0 0x00000000 0x0 0x00080000>;
+				read-only;
+			};
+			partition@80000 {
+				label = "dtb";
+				reg = <0x0 0x00080000 0x0 0x00080000>;
+				read-only;
+			};
+
+			partition@100000 {
+				label = "firmware";
+				reg = <0x0 0x00100000 0x0 0x00F00000>;
+				read-only;
+			};
+			partition@1000000 {
+				label = "rootfs";
+				reg = <0x0 0x01000000 0x0 0x01000000>;
+			};
 		};
 
 	};

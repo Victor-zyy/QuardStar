@@ -19,10 +19,12 @@
 #ifndef HW_RISCV_QUARD_STAR__H
 #define HW_RISCV_QUARD_STAR__H
 
+//#define SPI_NOR 
 #include "hw/riscv/riscv_hart.h"
 #include "hw/sysbus.h"
 #include "hw/block/flash.h"
 #include "qom/object.h"
+#include "hw/ssi/sifive_spi.h"
 
 #define QUARD_STAR_CPUS_MAX 8
 #define QUARD_STAR_SOCKETS_MAX 8
@@ -39,7 +41,11 @@ struct RISCVVirtState {
     /*< public >*/
     RISCVHartArrayState soc[QUARD_STAR_SOCKETS_MAX];
     DeviceState *plic[QUARD_STAR_SOCKETS_MAX];
+    #ifdef SPI_NOR
+    SiFiveSPIState spi0;
+    #else
     PFlashCFI01 *flash;
+    #endif
     FWCfgState *fw_cfg;
 };
 
@@ -51,6 +57,7 @@ enum {
     QUARD_STAR_UART0,
     QUARD_STAR_UART1,
     QUARD_STAR_UART2,
+    QUARD_STAR_QSPI0,
     QUARD_STAR_VIRTIO,
     QUARD_STAR_FW_CFG,
     QUARD_STAR_FLASH,
@@ -63,6 +70,7 @@ enum {
     QUARD_STAR_UART0_IRQ = 10,
     QUARD_STAR_UART1_IRQ = 11,
     QUARD_STAR_UART2_IRQ = 12,
+    QUARD_STAR_SPI0_IRQ = 17,
 };
 
 #define QUARD_STAR_PLIC_HART_CONFIG    "MS"

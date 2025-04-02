@@ -24,6 +24,7 @@
 #include "hw/boards.h"
 #include "hw/loader.h"
 #include "hw/sysbus.h"
+#include "hw/ssi/ssi.h"
 #include "hw/qdev-properties.h"
 #include "hw/char/serial.h"
 #include "target/riscv/cpu.h"
@@ -46,6 +47,7 @@ static const MemMapEntry virt_memmap[] = {
     [QUARD_STAR_UART0] = { 0x10000000,         0x100 },
     [QUARD_STAR_UART1] = { 0x10001000,         0x100 },
     [QUARD_STAR_UART2] = { 0x10002000,         0x100 },
+    [QUARD_STAR_QSPI0] = { 0x10040000,     0x1000 },
     [QUARD_STAR_VIRTIO] = { 0x10100000,        0x1000 }, //Eight consecutive groups
     [QUARD_STAR_FW_CFG] = { 0x10108000,          0x18 },
     [QUARD_STAR_FLASH] = { 0x20000000,      0x2000000},
@@ -140,6 +142,12 @@ static void quard_star_machine_init(MachineState *machine)
     char *plic_hart_config;
     size_t plic_hart_config_len;
     DeviceState *mmio_plic = NULL, *virtio_plic = NULL;
+    #ifdef SPI_NOR
+    DeviceState *flash_dev;
+    DriveInfo *dinfo;
+    qemu_irq flash_cs;
+    MemoryRegion *flash0 = g_new(MemoryRegion, 1);
+    #endif
 
     if (QUARD_STAR_SOCKETS_MAX < riscv_socket_count(machine)) {
         error_report("number of sockets/nodes should be less than %d",
@@ -258,10 +266,40 @@ static void quard_star_machine_init(MachineState *machine)
     fw_cfg_add_i16(s->fw_cfg, FW_CFG_NB_CPUS, (uint16_t)machine->smp.cpus);
     rom_set_fw(s->fw_cfg);
 
+
+    #ifdef SPI_NOR
+    /* Connect an SPI flash to SPI0 */
+    object_initialize_child(OBJECT(machine), "spi0", &s->spi0, TYPE_SIFIVE_SPI);
+    sysbus_realize(SYS_BUS_DEVICE(&s->spi0), &error_abort);
+    sysbus_mmio_map(SYS_BUS_DEVICE(&s->spi0), 0,
+                    memmap[QUARD_STAR_QSPI0].base);
+    sysbus_connect_irq(SYS_BUS_DEVICE(&s->spi0), 0,
+                       qdev_get_gpio_in(DEVICE(s->plic), QUARD_STAR_SPI0_IRQ));
+
+    flash_dev = qdev_new("is25wp256");
+    dinfo = drive_get_next(IF_MTD);
+    printf("get into there");
+    if (dinfo) {
+        qdev_prop_set_drive_err(flash_dev, "drive",
+                                blk_by_legacy_dinfo(dinfo),
+                                &error_fatal);
+    }
+    qdev_realize_and_unref(flash_dev, BUS(s->spi0.spi), &error_fatal);
+    flash_cs = qdev_get_gpio_in_named(flash_dev, SSI_GPIO_CS, 0);
+    sysbus_connect_irq(SYS_BUS_DEVICE(&s->spi0), 1, flash_cs);
+
+    /* register QSPI0 Flash */
+    memory_region_init_ram(flash0, NULL, "quard-star.flash0",
+                           memmap[QUARD_STAR_FLASH].size, &error_fatal);
+    memory_region_add_subregion(system_memory, memmap[QUARD_STAR_FLASH].base,
+                                flash0);
+
+    #else
     s->flash = quard_star_flash_create(s, "quard-star.flash0", "pflash0");
     pflash_cfi01_legacy_drive(s->flash, drive_get(IF_PFLASH, 0, 0));
     quard_star_flash_map(s->flash, virt_memmap[QUARD_STAR_FLASH].base,
                          virt_memmap[QUARD_STAR_FLASH].size, system_memory);
+    #endif
 }
 
 static void quard_star_machine_instance_init(Object *obj)
