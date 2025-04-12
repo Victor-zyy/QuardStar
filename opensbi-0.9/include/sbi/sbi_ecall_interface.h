@@ -38,6 +38,9 @@
 #define SBI_EXT_BASE_GET_MARCHID		0x5
 #define SBI_EXT_BASE_GET_MIMPID			0x6
 #define SBI_EXT_BASE_GET_MSG			0x7
+// fixme
+#define SBI_EXT_BASE_GET_MEMSTART		0x8
+#define SBI_EXT_BASE_GET_MEMEND			0x9
 
 /* SBI function IDs for TIME extension*/
 #define SBI_EXT_TIME_SET_TIMER			0x0

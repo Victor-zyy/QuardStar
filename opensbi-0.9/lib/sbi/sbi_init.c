@@ -24,6 +24,8 @@
 #include <sbi/sbi_timer.h>
 #include <sbi/sbi_tlb.h>
 #include <sbi/sbi_version.h>
+#include <sbi_utils/fdt/fdt_helper.h>
+#include <libfdt.h>
 
 #define BANNER                                              \
 	"   ____                    _____ ____ _____\n"     \
@@ -48,6 +50,23 @@ static void sbi_boot_print_banner(struct sbi_scratch *scratch)
 #endif
 
 	sbi_printf(BANNER);
+}
+
+uint64_t mem_addr;
+uint64_t mem_size;
+
+static int sbi_mem_init(unsigned long *addr, unsigned long* size)
+{
+
+	int coff;
+	void *fdt = sbi_scratch_thishart_arg1_ptr();
+
+	/* Find offset of node pointed by stdout-path */
+	coff = fdt_path_offset(fdt, "/memory");
+	if(-1 < coff){
+	  return fdt_get_node_addr_size(fdt, coff, addr, size);
+	}
+	return 0;
 }
 
 static void sbi_boot_print_general(struct sbi_scratch *scratch)
@@ -299,6 +318,13 @@ static void __noreturn init_coldboot(struct sbi_scratch *scratch, u32 hartid)
 		sbi_hart_hang();
 	}
 
+	rc = sbi_mem_init(&mem_addr, &mem_size);
+	if (rc) {
+		sbi_printf("%s: platform final init failed (error %d)\n",
+			   __func__, rc);
+		sbi_hart_hang();
+	}
+
 	sbi_boot_print_hart(scratch, hartid);
 
 	wake_coldboot_harts(scratch, hartid);
@@ -427,6 +453,7 @@ void __noreturn sbi_init(struct sbi_scratch *scratch)
 		init_warmboot(scratch, hartid);
 }
 
+
 unsigned long sbi_init_count(u32 hartid)
 {
 	struct sbi_scratch *scratch;
@@ -443,6 +470,8 @@ unsigned long sbi_init_count(u32 hartid)
 
 	return *init_count;
 }
+
+
 
 /**
  * Exit OpenSBI library for current HART and stop HART
@@ -473,3 +502,4 @@ void __noreturn sbi_exit(struct sbi_scratch *scratch)
 
 	sbi_hsm_exit(scratch);
 }
+

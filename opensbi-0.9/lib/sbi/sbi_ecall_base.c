@@ -19,6 +19,8 @@
 #include <sbi/sbi_ipi.h>
 #include <sbi/sbi_scratch.h>
 
+extern uint64_t mem_addr;
+extern uint64_t mem_size;
 static int sbi_ecall_base_probe(unsigned long extid, unsigned long *out_val)
 {
 	struct sbi_ecall_extension *ext;
@@ -76,6 +78,22 @@ static int sbi_ecall_base_handler(unsigned long extid, unsigned long funcid,
 	       data = sbi_scratch_offset_ptr(scratch, ipi_msg_off);
 	       sbi_memcpy((void *)regs->a2, data, sbi_strlen(data) + 1);
 	       break;
+        case SBI_EXT_BASE_GET_MEMSTART:
+               *out_val = mem_addr;
+               break;
+        case SBI_EXT_BASE_GET_MEMEND:
+               *out_val = mem_size;
+               break;
+	case SBI_EXT_FIRMWARE_START:
+	       scratch = sbi_scratch_thishart_ptr();
+	       *out_val = scratch->fw_start;
+	  break;
+
+	case SBI_EXT_FIRMWARE_END:
+	       scratch = sbi_scratch_thishart_ptr();
+	       *out_val = scratch->fw_start + scratch->fw_size;
+	  break;
+
 	default:
 		ret = SBI_ENOTSUPP;
 	}
